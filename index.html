@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <!-- figma:head-start -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SCEB — Sistema de Controle de Empréstimos da Biblioteca</title>
+    <!-- figma:head-end -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body>  
+    <!-- figma:body-start -->
+
+    <section class="login-screen" id="login-screen" aria-labelledby="login-title">
+      <form class="login-panel" id="login-form">
+        <div class="login-brand">
+          <div class="ico">📖</div>
+          <span>SCEB</span>
+        </div>
+        <h1 id="login-title">Entrar no sistema</h1>
+        <p class="login-subtitle">Sistema de Controle de Empréstimos da Biblioteca</p>
+        <label class="usr-field">
+          E-mail
+          <input id="login-email" type="email" autocomplete="username" required />
+        </label>
+        <label class="usr-field">
+          Senha
+          <span class="login-password-wrap">
+            <input id="login-password" type="password" autocomplete="current-password" required />
+            <button class="login-password-toggle" id="login-password-toggle" type="button" aria-label="Mostrar senha" aria-pressed="false" title="Mostrar senha">
+              <span class="login-eye-icon" aria-hidden="true"><span class="login-eye-slash"></span></span>
+            </button>
+          </span>
+        </label>
+        <p class="login-feedback" id="login-feedback" aria-live="polite"></p>
+        <button class="btn btn-v login-submit" type="submit">Entrar</button>
+        <button class="login-forgot" id="login-forgot-btn" type="button">Esqueci minha senha</button>
+        <button class="btn login-register" id="login-register-btn" type="button">Cadastrar usuário</button>
+        <p class="login-demo">Acesso de demonstração: admin@biblioteca.edu.br / admin123</p>
+      </form>
+    </section>
+
+    <dialog class="usr-dialog" id="login-recovery-dialog" aria-labelledby="login-recovery-title">
+      <form id="login-recovery-form">
+        <div class="usr-dialog-hd">
+          <h2 id="login-recovery-title">Recuperar senha</h2>
+          <p>Informe seu e-mail cadastrado e escolha uma nova senha.</p>
+        </div>
+        <label class="usr-field">
+          E-mail cadastrado
+          <input id="login-recovery-email" type="email" autocomplete="email" required />
+        </label>
+        <label class="usr-field">
+          Nova senha
+          <input id="login-recovery-password" type="password" autocomplete="new-password" minlength="8" required />
+        </label>
+        <label class="usr-field">
+          Confirme a nova senha
+          <input id="login-recovery-confirm" type="password" autocomplete="new-password" minlength="8" required />
+        </label>
+        <p class="usr-recovery-message">Protótipo: a senha será alterada localmente; nenhum e-mail será enviado.</p>
+        <div class="usr-dialog-actions">
+          <button class="btn-o" id="login-recovery-cancel" type="button">Cancelar</button>
+          <button class="btn btn-v" type="submit">Redefinir senha</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- ── Sidebar ── -->
+    <aside id="sidebar">
+      <div class="sb-logo">
+        <div class="ico">📖</div>
+        <div>
+          <p class="name">SCEB</p>
+          <p class="sub">Sistema de controle de Empréstimos da Biblioteca</p>
+        </div>
+      </div>
+
+      <nav id="nav">
+        <button class="nav-btn active" data-page="dashboard">⊞ &nbsp;Dashboard</button>
+        <button class="nav-btn" data-page="livros">📚 &nbsp;Livros</button>
+        <button class="nav-btn" data-page="emprestimos">🔄 &nbsp;Empréstimos</button>
+        <button class="nav-btn" data-page="solicitacoes">📋 &nbsp;Solicitações</button>
+        <button class="nav-btn" data-page="usuarios">👥 &nbsp;Usuários</button>
+        <button class="nav-btn" data-page="categorias">🏷️ &nbsp;Categorias</button>
+      </nav>
+
+      <div class="sb-user">
+        <div class="avatar">AS</div>
+        <div>
+          <p class="uname">Admin Sistema</p>
+          <p class="urole">ADMINISTRADOR</p>
+        </div>
+        <button class="logout-btn" id="logout-btn" type="button" aria-label="Sair" title="Sair">↪</button>
+      </div>
+    </aside>
+
+    <!-- ── Conteúdo principal ── -->
+    <main id="main">
+
+      <!-- Dashboard -->
+      <section class="page active" id="page-dashboard">
+        <div class="ph">
+          <div>
+            <h1 class="ph-title">Visão Geral</h1>
+            <p class="ph-sub" id="today"></p>
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-head">
+              <span class="stat-lbl">Total de Livros</span>
+              <div class="stat-dot" style="background:var(--navy-400)"></div>
+            </div>
+            <div class="stat-val" id="s-livros">—</div>
+            <div class="stat-sub" id="s-livros-sub"></div>
+          </div>
+          <div class="stat">
+            <div class="stat-head">
+              <span class="stat-lbl">Empréstimos Ativos</span>
+              <div class="stat-dot" style="background:var(--emerald-500)"></div>
+            </div>
+            <div class="stat-val" id="s-ativos">—</div>
+            <div class="stat-sub">em andamento</div>
+          </div>
+          <div class="stat">
+            <div class="stat-head">
+              <span class="stat-lbl">Atrasados</span>
+              <div class="stat-dot" style="background:var(--rose-500)"></div>
+            </div>
+            <div class="stat-val" id="s-atrasados">—</div>
+            <div class="stat-sub">requer atenção</div>
+          </div>
+          <div class="stat">
+            <div class="stat-head">
+              <span class="stat-lbl">Solicitações Pendentes</span>
+              <div class="stat-dot" style="background:var(--amber-500)"></div>
+            </div>
+            <div class="stat-val" id="s-pendentes">—</div>
+            <div class="stat-sub">aguardando aprovação</div>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="card">
+            <div class="card-hd">Empréstimos Recentes</div>
+            <div id="d-emp"></div>
+          </div>
+          <div class="card">
+            <div class="card-hd">Solicitações Pendentes</div>
+            <div id="d-sol"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd">Disponibilidade do Acervo</div>
+          <div style="padding:20px" id="d-bars"></div>
+        </div>
+      </section>
+
+      <!-- Livros -->
+      <section class="page" id="page-livros">
+        <div class="ph">
+          <div>
+            <h1 class="ph-title">Acervo</h1>
+            <p class="ph-sub" id="livros-count"></p>
+          </div>
+          <button class="btn btn-v" id="book-add-btn" type="button">+ Cadastrar Livro</button>
+        </div>
+        <div class="srch-wrap">
+          <span class="srch-ico">🔍</span>
+          <input class="srch" id="livros-srch" placeholder="Buscar por título, ISBN ou categoria…" />
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Categoria</th>
+                <th>ISBN</th>
+                <th>Editora</th>
+                <th style="text-align:center">Disponível</th>
+              </tr>
+            </thead>
+            <tbody id="livros-tb"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Empréstimos -->
+      <section class="page" id="page-emprestimos">
+        <div class="ph">
+          <div>
+            <h1 class="ph-title">Empréstimos</h1>
+            <p class="ph-sub" id="emp-count"></p>
+          </div>
+          <button class="btn btn-v" id="loan-add-btn" type="button">+ Registrar Empréstimo</button>
+        </div>
+        <div class="ftabs" id="emp-ftabs"></div>
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Livro</th>
+                <th>Usuário</th>
+                <th>Empréstimo</th>
+                <th>Devolução</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="emp-tb"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Solicitações -->
+      <section class="page" id="page-solicitacoes">
+        <div class="ph">
+          <div>
+            <h1 class="ph-title">Solicitações de Empréstimo</h1>
+            <p class="ph-sub" id="sol-count"></p>
+          </div>
+        </div>
+        <div id="sol-list"></div>
+      </section>
+
+      <!-- Usuários -->
+      <section class="page" id="page-usuarios">
+        <div class="ph">
+          <div>
+            <h1 class="ph-title">Usuários</h1>
+            <p class="ph-sub" id="usr-count"></p>
+          </div>
+          <button class="btn btn-v" id="usr-add-btn" type="button">+ Cadastrar Usuário</button>
+        </div>
+        <div class="ugrid" id="usr-grid"></div>
+      </section>
+
+      <dialog class="usr-dialog" id="usr-dialog" aria-labelledby="usr-dialog-title">
+        <form id="usr-form">
+          <div class="usr-dialog-hd">
+            <h2 id="usr-dialog-title">Cadastrar usuário</h2>
+            <p>Preencha os dados para adicionar uma pessoa ao sistema.</p>
+          </div>
+          <label class="usr-field">
+            Nome completo
+            <input id="usr-name" name="nome" type="text" autocomplete="name" required />
+          </label>
+          <label class="usr-field">
+            E-mail
+            <input id="usr-email" name="email" type="email" autocomplete="email" required />
+          </label>
+          <label class="usr-field">
+            Senha de acesso
+            <span class="login-password-wrap">
+              <input id="usr-password" name="senha" type="password" autocomplete="new-password" minlength="8" required />
+              <button class="login-password-toggle" id="usr-password-toggle" type="button" aria-label="Mostrar senha" aria-pressed="false" title="Mostrar senha">
+                <span class="login-eye-icon" aria-hidden="true"><span class="login-eye-slash"></span></span>
+              </button>
+            </span>
+          </label>
+          <label class="usr-field">
+            Tipo de usuário
+            <select name="tipo" required>
+              <option value="">Selecione um tipo</option>
+              <option value="ALUNO">Aluno</option>
+              <option value="PROFESSOR">Professor</option>
+              <option value="BIBLIOTECARIO">Bibliotecário</option>
+              <option value="ADMINISTRADOR">Administrador</option>
+            </select>
+          </label>
+          <div id="usr-master-group" hidden>
+            <label class="usr-field">
+              Senha master
+              <input id="usr-master-password" type="password" autocomplete="off" />
+            </label>
+            <button class="usr-recovery-link" id="usr-recover-open" type="button">Esqueci a senha master</button>
+          </div>
+          <div class="usr-dialog-actions">
+            <button class="btn-o" id="usr-cancel-btn" type="button">Cancelar</button>
+            <button class="btn btn-v" type="submit">Cadastrar</button>
+          </div>
+        </form>
+      </dialog>
+
+      <dialog class="usr-dialog" id="usr-recovery-dialog" aria-labelledby="usr-recovery-title">
+        <form id="usr-recovery-form">
+          <div class="usr-dialog-hd">
+            <h2 id="usr-recovery-title">Recuperar senha master</h2>
+            <p>Informe o e-mail vinculado a um usuário cadastrado.</p>
+          </div>
+          <label class="usr-field">
+            E-mail cadastrado
+            <input id="usr-recovery-email" type="email" autocomplete="email" required />
+          </label>
+          <p class="usr-recovery-message" id="usr-recovery-message" aria-live="polite"></p>
+          <div class="usr-dialog-actions">
+            <button class="btn-o" id="usr-recovery-cancel" type="button">Fechar</button>
+            <button class="btn btn-v" type="submit">Solicitar recuperação</button>
+          </div>
+        </form>
+      </dialog>
+
+      <!-- Categorias -->
+      <section class="page" id="page-categorias">
+        <div class="ph">
+          <div>
+            <h1 class="ph-title">Categorias</h1>
+            <p class="ph-sub" id="cat-count"></p>
+          </div>
+          <button class="btn btn-v" id="category-add-btn" type="button">+ Nova Categoria</button>
+        </div>
+        <div class="cgrid" id="cat-grid"></div>
+      </section>
+
+      <dialog class="usr-dialog" id="book-dialog" aria-labelledby="book-dialog-title">
+        <form id="book-form">
+          <div class="usr-dialog-hd">
+            <h2 id="book-dialog-title">Cadastrar livro</h2>
+            <p>Informe os dados do título para adicioná-lo ao acervo.</p>
+          </div>
+          <label class="usr-field">
+            Título
+            <input id="book-title" type="text" required />
+          </label>
+          <label class="usr-field">
+            Categoria
+            <select id="book-category" required></select>
+          </label>
+          <label class="usr-field">
+            ISBN
+            <input id="book-isbn" type="text" required />
+          </label>
+          <label class="usr-field">
+            Editora
+            <input id="book-publisher" type="text" required />
+          </label>
+          <label class="usr-field">
+            Ano de publicação
+            <input id="book-year" type="number" min="1" max="9999" required />
+          </label>
+          <label class="usr-field">
+            Exemplares
+            <input id="book-copies" type="number" min="1" step="1" required />
+          </label>
+          <div class="usr-dialog-actions">
+            <button class="btn-o" id="book-cancel-btn" type="button">Cancelar</button>
+            <button class="btn btn-v" type="submit">Cadastrar livro</button>
+          </div>
+        </form>
+      </dialog>
+
+      <dialog class="usr-dialog" id="loan-dialog" aria-labelledby="loan-dialog-title">
+        <form id="loan-form">
+          <div class="usr-dialog-hd">
+            <h2 id="loan-dialog-title">Registrar empréstimo</h2>
+            <p>Selecione um exemplar disponível e o usuário responsável.</p>
+          </div>
+          <label class="usr-field">
+            Livro
+            <select id="loan-book" required></select>
+          </label>
+          <label class="usr-field">
+            Usuário
+            <select id="loan-user" required></select>
+          </label>
+          <label class="usr-field">
+            Data do empréstimo
+            <input id="loan-date" type="date" required />
+          </label>
+          <label class="usr-field">
+            Data prevista para devolução
+            <input id="loan-due-date" type="date" required />
+          </label>
+          <div class="usr-dialog-actions">
+            <button class="btn-o" id="loan-cancel-btn" type="button">Cancelar</button>
+            <button class="btn btn-v" id="loan-submit-btn" type="submit">Registrar</button>
+          </div>
+        </form>
+      </dialog>
+
+      <dialog class="usr-dialog" id="category-dialog" aria-labelledby="category-dialog-title">
+        <form id="category-form">
+          <div class="usr-dialog-hd">
+            <h2 id="category-dialog-title">Nova categoria</h2>
+            <p>Organize o acervo com uma categoria.</p>
+          </div>
+          <label class="usr-field">
+            Nome
+            <input id="category-name" type="text" required />
+          </label>
+          <label class="usr-field">
+            Descrição
+            <input id="category-description" type="text" required />
+          </label>
+          <div class="usr-dialog-actions">
+            <button class="btn-o" id="category-cancel-btn" type="button">Cancelar</button>
+            <button class="btn btn-v" type="submit">Criar categoria</button>
+          </div>
+        </form>
+      </dialog>
+
+    </main>
+
+    <script src="/js/app.js"></script>
+
+    <!-- figma:body-end -->
+  </body>
+</html>

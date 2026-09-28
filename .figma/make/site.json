@@ -1,0 +1,10 @@
+{
+  "description": "Create interactive prototypes from diagrams, allowing designers and teams to visualize and test user interfaces efficiently.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
