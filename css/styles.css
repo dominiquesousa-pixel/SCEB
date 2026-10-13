@@ -71,6 +71,10 @@ body {
   background: var(--navy-900);
 }
 
+
+  [hidden] {
+    display: none !important;
+  }
 .login-screen[hidden] {
   display: none;
 }

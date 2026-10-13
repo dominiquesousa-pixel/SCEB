@@ -1,78 +1,89 @@
-// ── Dados ────────────────────────────────────────────────
-let livros = [
-  { id: 1, titulo: 'Dom Casmurro',            isbn: '978-85-359-0277-1', editora: 'Ática',         ano: 1997, cat: 'Literatura Brasileira',     total: 5, disp: 3 },
-  { id: 2, titulo: 'Cálculo Vol. 1',           isbn: '978-85-221-0498-6', editora: 'LTC',            ano: 2011, cat: 'Ciências Exatas',            total: 8, disp: 2 },
-  { id: 3, titulo: 'Clean Code',               isbn: '978-0-13-235088-4', editora: 'Prentice Hall',  ano: 2008, cat: 'Tecnologia da Informação',   total: 4, disp: 4 },
-  { id: 4, titulo: 'Sociologia Contemporânea', isbn: '978-85-7522-493-2', editora: 'Saraiva',        ano: 2015, cat: 'Ciências Humanas',           total: 3, disp: 0 },
-  { id: 5, titulo: 'O Cortiço',                isbn: '978-85-359-0181-1', editora: 'Ática',          ano: 1999, cat: 'Literatura Brasileira',      total: 6, disp: 5 },
-  { id: 6, titulo: 'Direito Constitucional',   isbn: '978-85-392-0082-5', editora: 'Método',         ano: 2020, cat: 'Direito',                    total: 7, disp: 1 },
-  { id: 7, titulo: 'Design Patterns',          isbn: '978-0-20-163361-5', editora: 'Addison-Wesley', ano: 1994, cat: 'Tecnologia da Informação',   total: 3, disp: 3 },
-];
+// ── Dados e API ──────────────────────────────────────────
+let livros = [];
+let emprestimos = [];
+let solicitacoes = [];
+let usuarios = [];
+let categorias = [];
+let usuarioAtual = null;
 
-let emprestimos = [
-  { id: 1, livro: 'Dom Casmurro',            user: 'Lucas Henrique Souza',      de: '2026-09-01', ate: '2026-09-15', st: 'ATRASADO'  },
-  { id: 2, livro: 'Cálculo Vol. 1',           user: 'Profª. Mariana Figueiredo', de: '2026-09-10', ate: '2026-09-24', st: 'ATIVO'     },
-  { id: 3, livro: 'Sociologia Contemporânea', user: 'Rafael Andrade Lima',       de: '2026-09-05', ate: '2026-09-19', st: 'DEVOLVIDO' },
-  { id: 4, livro: 'Direito Constitucional',   user: 'Dr. Carlos Menezes',        de: '2026-09-12', ate: '2026-09-26', st: 'ATIVO'     },
-  { id: 5, livro: 'Clean Code',               user: 'Lucas Henrique Souza',      de: '2026-08-20', ate: '2026-09-03', st: 'ATRASADO'  },
-];
+const API_BASE = '/api';
+const TOKEN_KEY = 'sceb-token';
+const USER_KEY = 'sceb-user';
 
-let solicitacoes = [
-  { id: 1, livro: 'Cálculo Vol. 1',  user: 'Rafael Andrade Lima',       data: '2026-09-23', st: 'PENDENTE'  },
-  { id: 2, livro: 'Dom Casmurro',    user: 'Dr. Carlos Menezes',        data: '2026-09-22', st: 'PENDENTE'  },
-  { id: 3, livro: 'Design Patterns', user: 'Profª. Mariana Figueiredo', data: '2026-09-20', st: 'APROVADA'  },
-  { id: 4, livro: 'O Cortiço',       user: 'Lucas Henrique Souza',      data: '2026-09-18', st: 'REPROVADA' },
-];
+async function apiRequest(path, options = {}) {
+  const headers = { ...options.headers };
+  const token = sessionStorage.getItem(TOKEN_KEY);
+  if (token) headers.Authorization = `Bearer ${token}`;
+  if (options.body) headers['Content-Type'] = 'application/json';
 
-let usuarios = [
-  { id: 1, nome: 'Ana Beatriz Carvalho',      email: 'ana.carvalho@biblioteca.edu.br', tipo: 'BIBLIOTECARIO'  },
-  { id: 2, nome: 'Lucas Henrique Souza',      email: 'lucas.souza@aluno.edu.br',       tipo: 'ALUNO'          },
-  { id: 3, nome: 'Profª. Mariana Figueiredo', email: 'm.figueiredo@docente.edu.br',    tipo: 'PROFESSOR'      },
-  { id: 4, nome: 'Rafael Andrade Lima',       email: 'r.andrade@aluno.edu.br',         tipo: 'ALUNO'          },
-  { id: 5, nome: 'Dr. Carlos Menezes',        email: 'c.menezes@docente.edu.br',       tipo: 'PROFESSOR'      },
-  { id: 6, nome: 'Admin Sistema',             email: 'admin@biblioteca.edu.br',        tipo: 'ADMINISTRADOR', senha: 'admin123' },
-];
-
-let categorias = [
-  { id: 1, nome: 'Literatura Brasileira',    desc: 'Obras literárias de autores nacionais'          },
-  { id: 2, nome: 'Ciências Exatas',          desc: 'Matemática, física, química e correlatos'       },
-  { id: 3, nome: 'Ciências Humanas',         desc: 'Filosofia, sociologia, história e correlatos'   },
-  { id: 4, nome: 'Tecnologia da Informação', desc: 'Computação, programação e sistemas'             },
-  { id: 5, nome: 'Direito',                  desc: 'Legislação, jurisprudência e doutrina jurídica' },
-];
-
-const STORE_KEY = 'sceb-store-v1';
-
-function loadStore() {
-  try {
-    const stored = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
-    if (!stored || typeof stored !== 'object') return;
-
-    if (Array.isArray(stored.livros)) livros = stored.livros;
-    if (Array.isArray(stored.emprestimos)) emprestimos = stored.emprestimos;
-    if (Array.isArray(stored.solicitacoes)) solicitacoes = stored.solicitacoes;
-    if (Array.isArray(stored.usuarios)) usuarios = stored.usuarios;
-    if (Array.isArray(stored.categorias)) categorias = stored.categorias;
-  } catch {
-    // Retain the built-in demonstration data when storage is unavailable or invalid.
-  }
+  const response = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  const payload = response.status === 204 ? null : await response.json().catch(() => null);
+  if (!response.ok) throw new Error(payload?.error || 'Não foi possível comunicar com a API.');
+  return payload?.data;
 }
 
-function saveStore() {
-  try {
-    localStorage.setItem(STORE_KEY, JSON.stringify({
-      livros,
-      emprestimos,
-      solicitacoes,
-      usuarios,
-      categorias,
+function mapBook(book) {
+  return {
+    id: book.id,
+    titulo: book.title,
+    isbn: book.isbn,
+    editora: book.publisher || '',
+    ano: book.publicationYear || '',
+    cat: book.category.name,
+    categoryId: book.category.id,
+    total: book.copies,
+    disp: book.availableCopies,
+  };
+}
+
+function mapLoan(loan) {
+  const overdue = loan.status === 'ACTIVE' && new Date(loan.dueAt) < new Date();
+  return {
+    id: loan.id,
+    livro: loan.book.title,
+    user: loan.user.name,
+    de: loan.borrowedAt.slice(0, 10),
+    ate: loan.dueAt.slice(0, 10),
+    st: loan.status === 'RETURNED' ? 'DEVOLVIDO' : overdue ? 'ATRASADO' : 'ATIVO',
+  };
+}
+
+async function carregarDados() {
+  const books = await apiRequest('/books');
+  livros = books.map(mapBook);
+
+  if (['BIBLIOTECARIO', 'ADMINISTRADOR'].includes(usuarioAtual.role)) {
+    const [users, categories, loans] = await Promise.all([
+      apiRequest('/users'),
+      apiRequest('/categories'),
+      apiRequest('/loans'),
+    ]);
+    usuarios = users.map(user => ({
+      id: user.id,
+      nome: user.name,
+      email: user.email,
+      tipo: user.role,
     }));
-  } catch (error) {
-    console.error('Não foi possível salvar os dados deste navegador.', error);
+    categorias = categories.map(category => ({
+      id: category.id,
+      nome: category.name,
+      desc: category.description || '',
+    }));
+    emprestimos = loans.map(mapLoan);
+  } else {
+    usuarios = [];
+    categorias = [];
+    emprestimos = [];
   }
-}
 
-loadStore();
+  solicitacoes = [];
+  renderDashboard();
+  renderLivros(document.getElementById('livros-srch').value);
+  renderEmprestimos();
+  renderSolicitacoes();
+  renderUsuarios();
+  renderCategorias();
+}
 
 // ── Utilitários ──────────────────────────────────────────
 function badge(label) {
@@ -102,6 +113,7 @@ function corBarra(pct) {
 // ── Navegação ────────────────────────────────────────────
 document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.addEventListener('click', () => {
+    if (btn.hidden) return;
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     btn.classList.add('active');
@@ -115,14 +127,8 @@ const loginEmail = document.getElementById('login-email');
 const loginPassword = document.getElementById('login-password');
 const loginPasswordToggle = document.getElementById('login-password-toggle');
 const loginFeedback = document.getElementById('login-feedback');
-const loginRecoveryDialog = document.getElementById('login-recovery-dialog');
-const loginRecoveryForm = document.getElementById('login-recovery-form');
-const loginRecoveryEmail = document.getElementById('login-recovery-email');
-const loginRecoveryPassword = document.getElementById('login-recovery-password');
-const loginRecoveryConfirm = document.getElementById('login-recovery-confirm');
 const sidebar = document.getElementById('sidebar');
 const main = document.getElementById('main');
-let registeringFromLogin = false;
 
 sidebar.inert = true;
 main.inert = true;
@@ -134,6 +140,41 @@ function hideLoginPassword() {
   loginPasswordToggle.setAttribute('aria-pressed', 'false');
 }
 
+function configurarPerfil(role) {
+  const consultaOnly = ['ALUNO', 'PROFESSOR'].includes(role);
+  const paginasRestritas = ['dashboard', 'emprestimos', 'solicitacoes', 'usuarios', 'categorias'];
+
+  document.querySelectorAll('.nav-btn').forEach(button => {
+    button.hidden = consultaOnly && paginasRestritas.includes(button.dataset.page);
+  });
+  paginasRestritas.forEach(page => {
+    document.getElementById(`page-${page}`).hidden = consultaOnly;
+  });
+  ['book-add-btn', 'loan-add-btn', 'usr-add-btn', 'category-add-btn'].forEach(id => {
+    document.getElementById(id).hidden = consultaOnly;
+  });
+  const initialPage = consultaOnly ? 'livros' : 'dashboard';
+  document.querySelectorAll('.nav-btn').forEach(button => {
+    button.classList.toggle('active', button.dataset.page === initialPage);
+  });
+  document.querySelectorAll('.page').forEach(page => {
+    page.classList.toggle('active', page.id === `page-${initialPage}`);
+  });
+
+  document.querySelector('.sb-user .uname').textContent = usuarioAtual.name;
+  document.querySelector('.sb-user .urole').textContent = role;
+  document.querySelector('.sb-user .avatar').textContent = iniciais(usuarioAtual.name);
+}
+
+async function abrirAplicacao(user) {
+  usuarioAtual = user;
+  await carregarDados();
+  configurarPerfil(user.role);
+  loginScreen.hidden = true;
+  sidebar.inert = false;
+  main.inert = false;
+}
+
 loginPasswordToggle.addEventListener('click', () => {
   const revealing = loginPassword.type === 'password';
   loginPassword.type = revealing ? 'text' : 'password';
@@ -143,27 +184,36 @@ loginPasswordToggle.addEventListener('click', () => {
   loginPassword.focus();
 });
 
-loginForm.addEventListener('submit', event => {
+loginForm.addEventListener('submit', async event => {
   event.preventDefault();
   const email = loginEmail.value.trim().toLowerCase();
-  const senha = loginPassword.value;
-  const usuario = usuarios.find(conta => conta.email.toLowerCase() === email && conta.senha === senha);
-
-  if (!usuario) {
-    loginFeedback.textContent = 'E-mail ou senha inválidos.';
+  loginFeedback.textContent = '';
+  try {
+    const session = await apiRequest('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password: loginPassword.value }),
+    });
+    sessionStorage.setItem(TOKEN_KEY, session.token);
+    sessionStorage.setItem(USER_KEY, JSON.stringify(session.user));
+    await abrirAplicacao(session.user);
+  } catch (error) {
+    sessionStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(USER_KEY);
+    loginFeedback.textContent = error.message;
     loginPassword.value = '';
     hideLoginPassword();
     loginPassword.focus();
-    return;
   }
-
-  loginFeedback.textContent = '';
-  loginScreen.hidden = true;
-  sidebar.inert = false;
-  main.inert = false;
 });
 
 document.getElementById('logout-btn').addEventListener('click', () => {
+  sessionStorage.removeItem(TOKEN_KEY);
+  sessionStorage.removeItem(USER_KEY);
+  usuarioAtual = null;
+  livros = [];
+  emprestimos = [];
+  usuarios = [];
+  categorias = [];
   loginForm.reset();
   hideLoginPassword();
   loginFeedback.textContent = '';
@@ -173,48 +223,20 @@ document.getElementById('logout-btn').addEventListener('click', () => {
   loginEmail.focus();
 });
 
-document.getElementById('login-register-btn').addEventListener('click', () => {
-  registeringFromLogin = true;
-  usrForm.reset();
-  hideUserPassword();
-  updateMasterField();
-  usrDialog.showModal();
-});
+async function restaurarSessao() {
+  const token = sessionStorage.getItem(TOKEN_KEY);
+  if (!token) return;
 
-document.getElementById('login-forgot-btn').addEventListener('click', () => {
-  loginRecoveryForm.reset();
-  loginRecoveryConfirm.setCustomValidity('');
-  loginRecoveryDialog.showModal();
-});
-document.getElementById('login-recovery-cancel').addEventListener('click', () => loginRecoveryDialog.close());
-loginRecoveryConfirm.addEventListener('input', () => loginRecoveryConfirm.setCustomValidity(''));
-
-loginRecoveryForm.addEventListener('submit', event => {
-  event.preventDefault();
-  const email = loginRecoveryEmail.value.trim().toLowerCase();
-  const senha = loginRecoveryPassword.value;
-  loginRecoveryConfirm.setCustomValidity(
-    senha === loginRecoveryConfirm.value ? '' : 'As senhas não conferem.'
-  );
-  if (!loginRecoveryForm.reportValidity()) return;
-
-  const usuario = usuarios.find(conta => conta.email.toLowerCase() === email);
-  if (!usuario) {
-    loginRecoveryEmail.setCustomValidity('Não há usuário cadastrado com este e-mail.');
-    loginRecoveryEmail.reportValidity();
-    return;
+  try {
+    const user = await apiRequest('/auth/me');
+    sessionStorage.setItem(USER_KEY, JSON.stringify(user));
+    await abrirAplicacao(user);
+  } catch (error) {
+    sessionStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(USER_KEY);
+    loginFeedback.textContent = error.message;
   }
-
-  usuarios = usuarios.map(conta => conta.id === usuario.id ? { ...conta, senha } : conta);
-  saveStore();
-  loginEmail.value = email;
-  loginPassword.value = '';
-  hideLoginPassword();
-  loginFeedback.textContent = 'Senha redefinida. Entre com a nova senha.';
-  loginRecoveryForm.reset();
-  loginRecoveryDialog.close();
-});
-loginRecoveryEmail.addEventListener('input', () => loginRecoveryEmail.setCustomValidity(''));
+}
 
 // ── Dashboard ────────────────────────────────────────────
 function renderDashboard() {
@@ -304,7 +326,7 @@ let empFilter = 'TODOS';
 function renderEmprestimos() {
   document.getElementById('emp-count').textContent = `${emprestimos.length} registros`;
 
-  const statusList = ['TODOS', 'ATIVO', 'ATRASADO', 'DEVOLVIDO', 'CANCELADO'];
+  const statusList = ['TODOS', 'ATIVO', 'ATRASADO', 'DEVOLVIDO'];
   document.getElementById('emp-ftabs').innerHTML = statusList.map(s =>
     `<button class="ftab${empFilter === s ? ' active' : ''}" data-st="${s}">${s}</button>`
   ).join('');
@@ -330,15 +352,33 @@ function renderEmprestimos() {
           <td class="td-mo">${escapeHtml(e.de)}</td>
           <td class="td-mo" style="${corData}">${escapeHtml(e.ate)}</td>
           <td>${badge(e.st)}</td>
+          <td>${e.st === 'DEVOLVIDO' ? '' : `<button class="btn-o" type="button" data-return-loan="${escapeHtml(e.id)}">Registrar devolução</button>`}</td>
         </tr>`;
       }).join('')
-    : `<tr class="empty"><td colspan="6">Nenhum empréstimo nesta categoria</td></tr>`;
+    : `<tr class="empty"><td colspan="7">Nenhum empréstimo nesta categoria</td></tr>`;
+
+  document.querySelectorAll('[data-return-loan]').forEach(button => {
+    button.addEventListener('click', async () => {
+      try {
+        await apiRequest(`/loans/${button.dataset.returnLoan}/return`, { method: 'POST' });
+        await carregarDados();
+      } catch (error) {
+        window.alert(error.message);
+      }
+    });
+  });
 }
 
 // ── Solicitações ─────────────────────────────────────────
 function renderSolicitacoes() {
   document.getElementById('sol-count').textContent =
     `${solicitacoes.filter(s => s.st === 'PENDENTE').length} aguardando aprovação`;
+
+  if (solicitacoes.length === 0) {
+    document.getElementById('sol-list').innerHTML =
+      '<div class="li" style="justify-content:center;color:var(--navy-400);font-size:13px">Nenhuma solicitação registrada</div>';
+    return;
+  }
 
   document.getElementById('sol-list').innerHTML = solicitacoes.map(s => {
     const acoes = s.st === 'PENDENTE'
@@ -360,13 +400,6 @@ function renderSolicitacoes() {
       <div class="sol-acts">${badge(s.st)}${acoes}</div>
     </div>`;
   }).join('');
-}
-
-function setSol(id, st) {
-  solicitacoes = solicitacoes.map(s => s.id === id ? Object.assign({}, s, { st }) : s);
-  saveStore();
-  renderSolicitacoes();
-  renderDashboard();
 }
 
 // ── Usuários ─────────────────────────────────────────────
@@ -408,8 +441,6 @@ const usrRecoveryDialog = document.getElementById('usr-recovery-dialog');
 const usrRecoveryForm = document.getElementById('usr-recovery-form');
 const usrRecoveryEmail = document.getElementById('usr-recovery-email');
 const usrRecoveryMessage = document.getElementById('usr-recovery-message');
-const MASTER_PASSWORD = '2031';
-
 function hideUserPassword() {
   usrPassword.type = 'password';
   usrPasswordToggle.setAttribute('aria-label', 'Mostrar senha');
@@ -427,10 +458,10 @@ usrPasswordToggle.addEventListener('click', () => {
 });
 
 function updateMasterField() {
-  const requiresMaster = ['ADMINISTRADOR', 'BIBLIOTECARIO'].includes(usrType.value);
-  usrMasterGroup.hidden = !requiresMaster;
-  usrMasterPassword.required = requiresMaster;
-  if (!requiresMaster) usrMasterPassword.setCustomValidity('');
+  usrMasterGroup.hidden = true;
+  usrMasterPassword.required = false;
+  usrMasterPassword.value = '';
+  usrMasterPassword.setCustomValidity('');
 }
 
 document.getElementById('usr-add-btn').addEventListener('click', () => {
@@ -461,7 +492,7 @@ usrRecoveryForm.addEventListener('submit', event => {
     : 'Não há usuário cadastrado com esse e-mail.';
 });
 
-usrForm.addEventListener('submit', event => {
+usrForm.addEventListener('submit', async event => {
   event.preventDefault();
 
   const nome = usrName.value.trim();
@@ -473,34 +504,25 @@ usrForm.addEventListener('submit', event => {
       ? 'Este e-mail já está cadastrado.'
       : ''
   );
-  usrMasterPassword.setCustomValidity(
-    ['ADMINISTRADOR', 'BIBLIOTECARIO'].includes(tipo) && usrMasterPassword.value !== MASTER_PASSWORD
-      ? 'Senha master incorreta.'
-      : ''
-  );
-
   if (!usrForm.reportValidity()) return;
 
-  const id = Math.max(0, ...usuarios.map(usuario => usuario.id)) + 1;
-  usuarios = [...usuarios, { id, nome, email, tipo, senha: usrPassword.value }];
-  saveStore();
-  renderUsuarios();
+  try {
+    await apiRequest('/users', {
+      method: 'POST',
+      body: JSON.stringify({ name: nome, email, password: usrPassword.value, role: tipo }),
+    });
+    await carregarDados();
+  } catch (error) {
+    usrEmail.setCustomValidity(error.message);
+    usrEmail.reportValidity();
+    return;
+  }
+
   usrForm.reset();
   hideUserPassword();
   updateMasterField();
   usrDialog.close();
 
-  if (registeringFromLogin) {
-    registeringFromLogin = false;
-    loginEmail.value = email;
-    loginPassword.value = '';
-    hideLoginPassword();
-    loginFeedback.textContent = 'Cadastro concluído. Entre com seu e-mail e senha.';
-    loginScreen.hidden = false;
-    sidebar.inert = true;
-    main.inert = true;
-    loginEmail.focus();
-  }
 });
 
 // ── Categorias ───────────────────────────────────────────
@@ -525,7 +547,7 @@ const bookIsbn = document.getElementById('book-isbn');
 
 function populateBookCategories() {
   bookCategory.innerHTML = '<option value="">Selecione uma categoria</option>' +
-    categorias.map(c => `<option value="${escapeHtml(c.nome)}">${escapeHtml(c.nome)}</option>`).join('');
+    categorias.map(c => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.nome)}</option>`).join('');
 }
 
 document.getElementById('book-add-btn').addEventListener('click', () => {
@@ -537,7 +559,7 @@ document.getElementById('book-add-btn').addEventListener('click', () => {
 document.getElementById('book-cancel-btn').addEventListener('click', () => bookDialog.close());
 bookIsbn.addEventListener('input', () => bookIsbn.setCustomValidity(''));
 
-bookForm.addEventListener('submit', event => {
+bookForm.addEventListener('submit', async event => {
   event.preventDefault();
   const isbn = bookIsbn.value.trim();
   bookIsbn.setCustomValidity(
@@ -547,21 +569,25 @@ bookForm.addEventListener('submit', event => {
   );
   if (!bookForm.reportValidity()) return;
 
-  const id = Math.max(0, ...livros.map(livro => livro.id)) + 1;
-  const total = Number(document.getElementById('book-copies').value);
-  livros = [...livros, {
-    id,
-    titulo: document.getElementById('book-title').value.trim(),
-    cat: bookCategory.value,
-    isbn,
-    editora: document.getElementById('book-publisher').value.trim(),
-    ano: Number(document.getElementById('book-year').value),
-    total,
-    disp: total,
-  }];
-  saveStore();
-  renderLivros(document.getElementById('livros-srch').value);
-  renderDashboard();
+  try {
+    await apiRequest('/books', {
+      method: 'POST',
+      body: JSON.stringify({
+        title: document.getElementById('book-title').value.trim(),
+        categoryId: bookCategory.value,
+        isbn,
+        publisher: document.getElementById('book-publisher').value.trim(),
+        publicationYear: Number(document.getElementById('book-year').value),
+        copies: Number(document.getElementById('book-copies').value),
+      }),
+    });
+    await carregarDados();
+  } catch (error) {
+    bookIsbn.setCustomValidity(error.message);
+    bookIsbn.reportValidity();
+    return;
+  }
+
   bookForm.reset();
   bookDialog.close();
 });
@@ -611,26 +637,27 @@ loanDate.addEventListener('change', () => {
   if (loanDueDate.value < loanDate.value) loanDueDate.value = loanDate.value;
 });
 
-loanForm.addEventListener('submit', event => {
+loanForm.addEventListener('submit', async event => {
   event.preventDefault();
-  const livro = livros.find(item => item.id === Number(loanBook.value));
-  const usuario = usuarios.find(item => item.id === Number(loanUser.value));
+  const livro = livros.find(item => item.id === loanBook.value);
+  const usuario = usuarios.find(item => item.id === loanUser.value);
   if (!livro || !usuario || livro.disp < 1 || !loanForm.reportValidity()) return;
 
-  const id = Math.max(0, ...emprestimos.map(emprestimo => emprestimo.id)) + 1;
-  emprestimos = [...emprestimos, {
-    id,
-    livro: livro.titulo,
-    user: usuario.nome,
-    de: loanDate.value,
-    ate: loanDueDate.value,
-    st: 'ATIVO',
-  }];
-  livros = livros.map(item => item.id === livro.id ? { ...item, disp: item.disp - 1 } : item);
-  saveStore();
-  renderEmprestimos();
-  renderLivros(document.getElementById('livros-srch').value);
-  renderDashboard();
+  try {
+    await apiRequest('/loans', {
+      method: 'POST',
+      body: JSON.stringify({
+        bookId: livro.id,
+        userId: usuario.id,
+        dueAt: new Date(`${loanDueDate.value}T23:59:59`).toISOString(),
+      }),
+    });
+    await carregarDados();
+  } catch (error) {
+    window.alert(error.message);
+    return;
+  }
+
   loanForm.reset();
   loanDialog.close();
 });
@@ -647,7 +674,7 @@ document.getElementById('category-add-btn').addEventListener('click', () => {
 document.getElementById('category-cancel-btn').addEventListener('click', () => categoryDialog.close());
 categoryName.addEventListener('input', () => categoryName.setCustomValidity(''));
 
-categoryForm.addEventListener('submit', event => {
+categoryForm.addEventListener('submit', async event => {
   event.preventDefault();
   const nome = categoryName.value.trim();
   categoryName.setCustomValidity(
@@ -657,23 +684,24 @@ categoryForm.addEventListener('submit', event => {
   );
   if (!categoryForm.reportValidity()) return;
 
-  const id = Math.max(0, ...categorias.map(categoria => categoria.id)) + 1;
-  categorias = [...categorias, {
-    id,
-    nome,
-    desc: document.getElementById('category-description').value.trim(),
-  }];
-  saveStore();
-  renderCategorias();
-  populateBookCategories();
+  try {
+    await apiRequest('/categories', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: nome,
+        description: document.getElementById('category-description').value.trim(),
+      }),
+    });
+    await carregarDados();
+  } catch (error) {
+    categoryName.setCustomValidity(error.message);
+    categoryName.reportValidity();
+    return;
+  }
+
   categoryForm.reset();
   categoryDialog.close();
 });
 
 // ── Inicialização ────────────────────────────────────────
-renderDashboard();
-renderLivros();
-renderEmprestimos();
-renderSolicitacoes();
-renderUsuarios();
-renderCategorias();
+restaurarSessao();

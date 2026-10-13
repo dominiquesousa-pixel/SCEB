@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ALUNO
+  PROFESSOR
+  BIBLIOTECARIO
+  ADMINISTRADOR
+}
+
+enum LoanStatus {
+  ACTIVE
+  RETURNED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(ALUNO)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  loans        Loan[]
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  books       Book[]
+}
+
+model Book {
+  id              String   @id @default(cuid())
+  title           String
+  isbn            String   @unique
+  publisher       String?
+  publicationYear Int?
+  copies          Int
+  availableCopies Int
+  categoryId      String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  category        Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  loans           Loan[]
+}
+
+model Loan {
+  id         String     @id @default(cuid())
+  userId     String
+  bookId     String
+  borrowedAt DateTime   @default(now())
+  dueAt      DateTime
+  returnedAt DateTime?
+  status     LoanStatus @default(ACTIVE)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  user       User       @relation(fields: [userId], references: [id], onDelete: Restrict)
+  book       Book       @relation(fields: [bookId], references: [id], onDelete: Restrict)
+
+  @@index([userId, status])
+  @@index([bookId, status])
+  @@index([dueAt, status])
+}

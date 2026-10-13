@@ -2,7 +2,9 @@ node_modules/
 dist/
 build/
 .cache/
+/backend/dev.db
 .env*
+!.env.example
 .vite/
 vite.config.*.timestamp-*
 *.tsbuildinfo
