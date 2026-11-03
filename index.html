@@ -53,11 +53,11 @@
         </label>
         <label class="usr-field">
           Nova senha
-          <input id="login-recovery-password" type="password" autocomplete="new-password" minlength="8" required />
+          <input id="login-recovery-password" type="password" autocomplete="new-password" minlength="8" maxlength="8" required />
         </label>
         <label class="usr-field">
           Confirme a nova senha
-          <input id="login-recovery-confirm" type="password" autocomplete="new-password" minlength="8" required />
+          <input id="login-recovery-confirm" type="password" autocomplete="new-password" minlength="8" maxlength="8" required />
         </label>
         <p class="usr-recovery-message">Protótipo: a senha será alterada localmente; nenhum e-mail será enviado.</p>
         <div class="usr-dialog-actions">
@@ -257,7 +257,7 @@
           <label class="usr-field">
             Senha de acesso
             <span class="login-password-wrap">
-              <input id="usr-password" name="senha" type="password" autocomplete="new-password" minlength="8" required />
+              <input id="usr-password" name="senha" type="password" autocomplete="new-password" minlength="8" maxlength="8" required />
               <button class="login-password-toggle" id="usr-password-toggle" type="button" aria-label="Mostrar senha" aria-pressed="false" title="Mostrar senha">
                 <span class="login-eye-icon" aria-hidden="true"><span class="login-eye-slash"></span></span>
               </button>

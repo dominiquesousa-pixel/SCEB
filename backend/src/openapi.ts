@@ -49,7 +49,7 @@ export const openApiDocument = {
         properties: {
           name: { type: 'string' },
           email: { type: 'string', format: 'email' },
-          password: { type: 'string', format: 'password', minLength: 8 },
+          password: { type: 'string', format: 'password', minLength: 8, maxLength: 8 },
           role: { $ref: '#/components/schemas/UserRole' },
         },
       },
@@ -58,7 +58,7 @@ export const openApiDocument = {
         properties: {
           name: { type: 'string' },
           email: { type: 'string', format: 'email' },
-          password: { type: 'string', format: 'password', minLength: 8 },
+          password: { type: 'string', format: 'password', minLength: 8, maxLength: 8 },
           role: { $ref: '#/components/schemas/UserRole' },
         },
       },

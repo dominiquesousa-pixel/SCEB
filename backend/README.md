@@ -16,7 +16,7 @@ Copy-Item .env.example .env
 npm install
 ```
 
-Edite `.env` e defina uma senha segura para o administrador de demonstração e um `JWT_SECRET` aleatório com pelo menos 32 caracteres. Depois inicialize o banco:
+Edite `.env` e defina uma senha de exatamente 8 caracteres para o administrador de demonstração e um `JWT_SECRET` aleatório com pelo menos 32 caracteres. Senhas de usuários também devem ter exatamente 8 caracteres. Depois inicialize o banco:
 
 ```powershell
 npm run db:migrate -- --name init

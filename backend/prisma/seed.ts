@@ -8,8 +8,8 @@ async function main() {
   const email = process.env.SEED_ADMIN_EMAIL;
   const password = process.env.SEED_ADMIN_PASSWORD;
 
-  if (!email || !password || password.length < 8) {
-    throw new Error('Defina SEED_ADMIN_EMAIL e SEED_ADMIN_PASSWORD (mínimo 8 caracteres).');
+  if (!email || !password || password.length !== 8) {
+    throw new Error('Defina SEED_ADMIN_EMAIL e SEED_ADMIN_PASSWORD (exatamente 8 caracteres).');
   }
 
   await prisma.user.upsert({
