@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../lib/prisma.js';
-import { libraryStaff } from '../middleware/auth.js';
+import { authorizeRoles, libraryStaff } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validate.js';
 import { createUserDto, updateUserDto } from '../dto/user.dto.js';
 
@@ -29,7 +29,7 @@ usersRouter.get('/:id', async (request, response) => {
   response.json({ data: user });
 });
 
-usersRouter.post('/', validateBody(createUserDto), async (request, response) => {
+usersRouter.post('/', authorizeRoles('ADMINISTRADOR'), validateBody(createUserDto), async (request, response) => {
   const input = request.body as {
     name: string;
     email: string;
@@ -48,7 +48,12 @@ usersRouter.post('/', validateBody(createUserDto), async (request, response) => 
   response.status(201).json({ data: user });
 });
 
-usersRouter.patch('/:id', validateBody(updateUserDto), async (request, response) => {
+usersRouter.patch('/:id', authorizeRoles('ADMINISTRADOR'), validateBody(updateUserDto), async (request, response) => {
+  if (String(request.params.id) === request.auth!.userId) {
+    response.status(403).json({ error: 'O administrador não pode editar a própria conta nesta tela.' });
+    return;
+  }
+
   const input = request.body as {
     name?: string;
     email?: string;
@@ -67,7 +72,12 @@ usersRouter.patch('/:id', validateBody(updateUserDto), async (request, response)
   response.json({ data: user });
 });
 
-usersRouter.delete('/:id', async (request, response) => {
+usersRouter.delete('/:id', authorizeRoles('ADMINISTRADOR'), async (request, response) => {
+  if (String(request.params.id) === request.auth!.userId) {
+    response.status(403).json({ error: 'O administrador não pode remover a própria conta.' });
+    return;
+  }
+
   await prisma.user.delete({ where: { id: String(request.params.id) } });
   response.status(204).end();
 });

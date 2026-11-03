@@ -378,9 +378,37 @@ nav {
   font-weight: 500;
 }
 
+.sb-user-info {
+  min-width: 0;
+}
+
+.sb-user .uname,
+.sb-user .urole {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .sb-user .urole {
   color: var(--navy-400);
   font-size: 11px;
+}
+
+.sb-user .auth-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 3px;
+  color: #86efac;
+  font-size: 10px;
+}
+
+.auth-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4ade80;
+  flex-shrink: 0;
 }
 
 .logout-btn {
@@ -825,6 +853,17 @@ tbody tr:hover {
   display: flex;
   align-items: center;
   gap: 16px;
+}
+
+.usr-card-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.usr-card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .uname  { font-size: 13px; font-weight: 500; color: var(--navy-900); }

@@ -128,12 +128,12 @@ export const openApiDocument = {
     },
     '/users': {
       get: { summary: 'Lista usuários (bibliotecário/administrador)', security: [{ bearerAuth: [] }], responses: { '200': { description: 'Usuários sem dados de senha' } } },
-      post: { summary: 'Cadastra usuário', security: [{ bearerAuth: [] }], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/UserInput' } } } }, responses: { '201': { description: 'Usuário criado' } } },
+      post: { summary: 'Cadastra usuário (administrador)', security: [{ bearerAuth: [] }], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/UserInput' } } } }, responses: { '201': { description: 'Usuário criado' }, '403': { description: 'Apenas administradores podem cadastrar usuários' } } },
     },
     '/users/{id}': {
       get: { summary: 'Consulta usuário', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Usuário' }, '404': { description: 'Não encontrado' } } },
-      patch: { summary: 'Atualiza usuário', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/UserUpdate' } } } }, responses: { '200': { description: 'Usuário atualizado' } } },
-      delete: { summary: 'Remove usuário sem empréstimos associados', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '204': { description: 'Usuário removido' }, '409': { description: 'Usuário possui empréstimos' } } },
+      patch: { summary: 'Atualiza usuário (administrador)', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/UserUpdate' } } } }, responses: { '200': { description: 'Usuário atualizado' }, '403': { description: 'Apenas administradores podem editar usuários' } } },
+      delete: { summary: 'Remove usuário sem empréstimos associados (administrador)', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '204': { description: 'Usuário removido' }, '403': { description: 'Apenas administradores podem remover usuários' }, '409': { description: 'Usuário possui empréstimos' } } },
     },
     '/loans': {
       get: { summary: 'Lista empréstimos (bibliotecário/administrador)', security: [{ bearerAuth: [] }], parameters: [{ name: 'status', in: 'query', schema: { type: 'string', enum: ['ACTIVE', 'RETURNED'] } }], responses: { '200': { description: 'Empréstimos' } } },

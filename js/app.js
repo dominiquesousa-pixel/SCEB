@@ -150,9 +150,10 @@ function configurarPerfil(role) {
   paginasRestritas.forEach(page => {
     document.getElementById(`page-${page}`).hidden = consultaOnly;
   });
-  ['book-add-btn', 'loan-add-btn', 'usr-add-btn', 'category-add-btn'].forEach(id => {
+  ['book-add-btn', 'loan-add-btn', 'category-add-btn'].forEach(id => {
     document.getElementById(id).hidden = consultaOnly;
   });
+  document.getElementById('usr-add-btn').hidden = role !== 'ADMINISTRADOR';
   const initialPage = consultaOnly ? 'livros' : 'dashboard';
   document.querySelectorAll('.nav-btn').forEach(button => {
     button.classList.toggle('active', button.dataset.page === initialPage);
@@ -253,7 +254,7 @@ function renderDashboard() {
 
   document.getElementById('d-emp').innerHTML = emprestimos.slice(0, 4).map(e =>
     `<div class="li">
-      <div style="min-width:0">
+      <div class="usr-card-info">
         <p class="li-t">${escapeHtml(e.livro)}</p>
         <p class="li-s">${escapeHtml(e.user)}</p>
       </div>
@@ -414,8 +415,20 @@ function renderUsuarios() {
         <p class="uemail">${escapeHtml(u.email)}</p>
         ${badge(u.tipo)}
       </div>
+      ${usuarioAtual.role === 'ADMINISTRADOR' && u.id !== usuarioAtual.id ? `
+        <div class="usr-card-actions">
+          <button class="btn-o" type="button" data-user-edit="${escapeHtml(u.id)}">Editar</button>
+          <button class="btn-r" type="button" data-user-delete="${escapeHtml(u.id)}">Remover</button>
+        </div>` : ''}
     </div>`
   ).join('');
+
+  document.querySelectorAll('[data-user-edit]').forEach(button => {
+    button.addEventListener('click', () => abrirEdicaoUsuario(button.dataset.userEdit));
+  });
+  document.querySelectorAll('[data-user-delete]').forEach(button => {
+    button.addEventListener('click', () => removerUsuario(button.dataset.userDelete));
+  });
 }
 
 function escapeHtml(value) {
@@ -435,12 +448,18 @@ const usrEmail = document.getElementById('usr-email');
 const usrPassword = document.getElementById('usr-password');
 const usrPasswordToggle = document.getElementById('usr-password-toggle');
 const usrType = usrForm.elements.tipo;
+const usrDialogTitle = document.getElementById('usr-dialog-title');
+const usrDialogDescription = document.getElementById('usr-dialog-description');
+const usrPasswordLabel = document.getElementById('usr-password-label');
+const usrSubmitButton = document.getElementById('usr-submit-btn');
 const usrMasterGroup = document.getElementById('usr-master-group');
 const usrMasterPassword = document.getElementById('usr-master-password');
 const usrRecoveryDialog = document.getElementById('usr-recovery-dialog');
 const usrRecoveryForm = document.getElementById('usr-recovery-form');
 const usrRecoveryEmail = document.getElementById('usr-recovery-email');
 const usrRecoveryMessage = document.getElementById('usr-recovery-message');
+let editingUserId = null;
+
 function hideUserPassword() {
   usrPassword.type = 'password';
   usrPasswordToggle.setAttribute('aria-label', 'Mostrar senha');
@@ -464,10 +483,53 @@ function updateMasterField() {
   usrMasterPassword.setCustomValidity('');
 }
 
-document.getElementById('usr-add-btn').addEventListener('click', () => {
+function configurarDialogoUsuario(user = null) {
+  editingUserId = user?.id ?? null;
   usrForm.reset();
+  usrName.setCustomValidity('');
+  usrEmail.setCustomValidity('');
   hideUserPassword();
   updateMasterField();
+  usrDialogTitle.textContent = user ? 'Editar usuário' : 'Cadastrar usuário';
+  usrDialogDescription.textContent = user
+    ? 'Atualize os dados da pessoa. Deixe a senha vazia para mantê-la.'
+    : 'Preencha os dados para adicionar uma pessoa ao sistema.';
+  usrPasswordLabel.textContent = user ? 'Nova senha (opcional)' : 'Senha de acesso';
+  usrPassword.required = !user;
+  usrSubmitButton.textContent = user ? 'Salvar alterações' : 'Cadastrar';
+
+  if (user) {
+    usrName.value = user.nome;
+    usrEmail.value = user.email;
+    usrType.value = user.tipo;
+  }
+}
+
+function abrirEdicaoUsuario(userId) {
+  if (usuarioAtual.role !== 'ADMINISTRADOR') return;
+  const user = usuarios.find(candidate => candidate.id === userId);
+  if (!user || user.id === usuarioAtual.id) return;
+  configurarDialogoUsuario(user);
+  usrDialog.showModal();
+}
+
+async function removerUsuario(userId) {
+  if (usuarioAtual.role !== 'ADMINISTRADOR') return;
+  const user = usuarios.find(candidate => candidate.id === userId);
+  if (!user || user.id === usuarioAtual.id) return;
+  if (!window.confirm(`Remover o usuário ${user.nome}?`)) return;
+
+  try {
+    await apiRequest(`/users/${encodeURIComponent(user.id)}`, { method: 'DELETE' });
+    await carregarDados();
+  } catch (error) {
+    window.alert(error.message);
+  }
+}
+
+document.getElementById('usr-add-btn').addEventListener('click', () => {
+  if (usuarioAtual?.role !== 'ADMINISTRADOR') return;
+  configurarDialogoUsuario();
   usrDialog.showModal();
 });
 document.getElementById('usr-cancel-btn').addEventListener('click', () => usrDialog.close());
@@ -500,16 +562,25 @@ usrForm.addEventListener('submit', async event => {
   const tipo = usrType.value;
   usrName.setCustomValidity(nome ? '' : 'Informe o nome completo.');
   usrEmail.setCustomValidity(
-    usuarios.some(usuario => usuario.email.toLowerCase() === email.toLowerCase())
+    usuarios.some(usuario =>
+      usuario.id !== editingUserId && usuario.email.toLowerCase() === email.toLowerCase()
+    )
       ? 'Este e-mail já está cadastrado.'
       : ''
   );
   if (!usrForm.reportValidity()) return;
 
+  const input = {
+    name: nome,
+    email,
+    role: tipo,
+    ...(usrPassword.value ? { password: usrPassword.value } : {}),
+  };
+
   try {
-    await apiRequest('/users', {
-      method: 'POST',
-      body: JSON.stringify({ name: nome, email, password: usrPassword.value, role: tipo }),
+    await apiRequest(editingUserId ? `/users/${encodeURIComponent(editingUserId)}` : '/users', {
+      method: editingUserId ? 'PATCH' : 'POST',
+      body: JSON.stringify(editingUserId ? input : { ...input, password: usrPassword.value }),
     });
     await carregarDados();
   } catch (error) {

@@ -88,9 +88,10 @@
 
       <div class="sb-user">
         <div class="avatar">AS</div>
-        <div>
+        <div class="sb-user-info">
           <p class="uname">Admin Sistema</p>
           <p class="urole">ADMINISTRADOR</p>
+          <p class="auth-status" role="status"><span class="auth-status-dot" aria-hidden="true"></span>Sessão autenticada</p>
         </div>
         <button class="logout-btn" id="logout-btn" type="button" aria-label="Sair" title="Sair">↪</button>
       </div>
@@ -244,7 +245,7 @@
         <form id="usr-form">
           <div class="usr-dialog-hd">
             <h2 id="usr-dialog-title">Cadastrar usuário</h2>
-            <p>Preencha os dados para adicionar uma pessoa ao sistema.</p>
+            <p id="usr-dialog-description">Preencha os dados para adicionar uma pessoa ao sistema.</p>
           </div>
           <label class="usr-field">
             Nome completo
@@ -255,7 +256,7 @@
             <input id="usr-email" name="email" type="email" autocomplete="email" required />
           </label>
           <label class="usr-field">
-            Senha de acesso
+            <span id="usr-password-label">Senha de acesso</span>
             <span class="login-password-wrap">
               <input id="usr-password" name="senha" type="password" autocomplete="new-password" minlength="8" maxlength="8" required />
               <button class="login-password-toggle" id="usr-password-toggle" type="button" aria-label="Mostrar senha" aria-pressed="false" title="Mostrar senha">
@@ -282,7 +283,7 @@
           </div>
           <div class="usr-dialog-actions">
             <button class="btn-o" id="usr-cancel-btn" type="button">Cancelar</button>
-            <button class="btn btn-v" type="submit">Cadastrar</button>
+            <button class="btn btn-v" id="usr-submit-btn" type="submit">Cadastrar</button>
           </div>
         </form>
       </dialog>
