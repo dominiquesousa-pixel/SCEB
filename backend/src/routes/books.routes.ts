@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
-import { authenticate, libraryStaff } from '../middleware/auth.js';
+import { authenticate, authorizeRoles, libraryStaff } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validate.js';
 import { createBookDto, updateBookDto } from '../dto/book.dto.js';
 import { HttpError } from '../utils/http-error.js';
@@ -61,7 +61,7 @@ booksRouter.post('/', ...libraryStaff, validateBody(createBookDto), async (reque
   response.status(201).json({ data: book });
 });
 
-booksRouter.patch('/:id', ...libraryStaff, validateBody(updateBookDto), async (request, response) => {
+booksRouter.patch('/:id', authenticate, authorizeRoles('ADMINISTRADOR'), validateBody(updateBookDto), async (request, response) => {
   const input = request.body as {
     title?: string;
     isbn?: string;
@@ -91,7 +91,7 @@ booksRouter.patch('/:id', ...libraryStaff, validateBody(updateBookDto), async (r
   response.json({ data: book });
 });
 
-booksRouter.delete('/:id', ...libraryStaff, async (request, response) => {
+booksRouter.delete('/:id', authenticate, authorizeRoles('ADMINISTRADOR'), async (request, response) => {
   await prisma.book.delete({ where: { id: String(request.params.id) } });
   response.status(204).end();
 });

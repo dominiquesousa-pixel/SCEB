@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { prisma } from '../lib/prisma.js';
-import { libraryStaff } from '../middleware/auth.js';
+import { authorizeRoles, libraryStaff } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validate.js';
 import { createCategoryDto, updateCategoryDto } from '../dto/category.dto.js';
 import { HttpError } from '../utils/http-error.js';
@@ -30,7 +30,7 @@ categoriesRouter.post('/', validateBody(createCategoryDto), async (request, resp
   response.status(201).json({ data: category });
 });
 
-categoriesRouter.patch('/:id', validateBody(updateCategoryDto), async (request, response) => {
+categoriesRouter.patch('/:id', authorizeRoles('ADMINISTRADOR'), validateBody(updateCategoryDto), async (request, response) => {
   const category = await prisma.category.update({
     where: { id: String(request.params.id) },
     data: request.body,
@@ -38,7 +38,7 @@ categoriesRouter.patch('/:id', validateBody(updateCategoryDto), async (request, 
   response.json({ data: category });
 });
 
-categoriesRouter.delete('/:id', async (request, response) => {
+categoriesRouter.delete('/:id', authorizeRoles('ADMINISTRADOR'), async (request, response) => {
   await prisma.category.delete({ where: { id: String(request.params.id) } });
   response.status(204).end();
 });

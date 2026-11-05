@@ -80,6 +80,16 @@ export const openApiDocument = {
           dueAt: { type: 'string', format: 'date-time' },
         },
       },
+      LoanUpdate: {
+        type: 'object',
+        properties: {
+          userId: { type: 'string' },
+          bookId: { type: 'string' },
+          borrowedAt: { type: 'string', format: 'date-time' },
+          dueAt: { type: 'string', format: 'date-time' },
+          status: { type: 'string', enum: ['ACTIVE', 'RETURNED'] },
+        },
+      },
     },
   },
   paths: {
@@ -114,8 +124,8 @@ export const openApiDocument = {
     },
     '/books/{id}': {
       get: { summary: 'Consulta livro e disponibilidade', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Livro' }, '404': { description: 'Não encontrado' } } },
-      patch: { summary: 'Atualiza livro (bibliotecário/administrador)', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/BookUpdate' } } } }, responses: { '200': { description: 'Livro atualizado' }, '403': { description: 'Acesso negado' } } },
-      delete: { summary: 'Remove livro sem empréstimos associados', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '204': { description: 'Livro removido' }, '409': { description: 'Livro relacionado a empréstimos' } } },
+      patch: { summary: 'Atualiza livro (administrador)', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/BookUpdate' } } } }, responses: { '200': { description: 'Livro atualizado' }, '403': { description: 'Acesso negado' } } },
+      delete: { summary: 'Remove livro sem empréstimos associados (administrador)', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '204': { description: 'Livro removido' }, '403': { description: 'Acesso negado' }, '409': { description: 'Livro relacionado a empréstimos' } } },
     },
     '/categories': {
       get: { summary: 'Lista categorias (bibliotecário/administrador)', security: [{ bearerAuth: [] }], responses: { '200': { description: 'Categorias' }, '403': { description: 'Acesso negado' } } },
@@ -123,8 +133,8 @@ export const openApiDocument = {
     },
     '/categories/{id}': {
       get: { summary: 'Consulta categoria', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Categoria' }, '404': { description: 'Não encontrada' } } },
-      patch: { summary: 'Atualiza categoria', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/CategoryUpdate' } } } }, responses: { '200': { description: 'Categoria atualizada' } } },
-      delete: { summary: 'Remove categoria sem livros associados', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '204': { description: 'Categoria removida' }, '409': { description: 'Categoria possui livros' } } },
+      patch: { summary: 'Atualiza categoria (administrador)', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/CategoryUpdate' } } } }, responses: { '200': { description: 'Categoria atualizada' }, '403': { description: 'Acesso negado' } } },
+      delete: { summary: 'Remove categoria sem livros associados (administrador)', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '204': { description: 'Categoria removida' }, '403': { description: 'Acesso negado' }, '409': { description: 'Categoria possui livros' } } },
     },
     '/users': {
       get: { summary: 'Lista usuários (bibliotecário/administrador)', security: [{ bearerAuth: [] }], responses: { '200': { description: 'Usuários sem dados de senha' } } },
@@ -141,6 +151,8 @@ export const openApiDocument = {
     },
     '/loans/{id}': {
       get: { summary: 'Consulta empréstimo', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Empréstimo' }, '404': { description: 'Não encontrado' } } },
+      patch: { summary: 'Edita empréstimo e ajusta disponibilidade (administrador)', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/LoanUpdate' } } } }, responses: { '200': { description: 'Empréstimo atualizado' }, '403': { description: 'Acesso negado' }, '409': { description: 'Sem exemplares disponíveis' } } },
+      delete: { summary: 'Remove empréstimo e repõe exemplar se ainda estiver ativo (administrador)', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '204': { description: 'Empréstimo removido' }, '403': { description: 'Acesso negado' }, '404': { description: 'Não encontrado' } } },
     },
     '/loans/{id}/return': {
       post: { summary: 'Registra devolução e repõe disponibilidade', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Devolução registrada' }, '409': { description: 'Já devolvido' } } },
