@@ -1,0 +1,24 @@
+{
+	"services": {
+		"frontend": {
+			"root": ".",
+			"framework": "vite",
+			"installCommand": "pnpm install --frozen-lockfile",
+			"buildCommand": "pnpm build",
+			"outputDirectory": "dist",
+			"rewrites": [
+				{ "source": "/(.*)", "destination": "/index.html" }
+			]
+		},
+		"backend": {
+			"root": "backend",
+			"framework": "express",
+			"entrypoint": "src/server.ts",
+			"installCommand": "npm ci"
+		}
+	},
+	"rewrites": [
+		{ "source": "/api/(.*)", "destination": { "service": "backend" } },
+		{ "source": "/(.*)", "destination": { "service": "frontend" } }
+	]
+}

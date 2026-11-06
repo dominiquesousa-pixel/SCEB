@@ -1093,3 +1093,215 @@ tbody tr:hover {
 
 .cname { font-size: 13px; font-weight: 600; color: var(--navy-900); }
 .cdesc { font-size: 12px; color: var(--navy-500); margin-top: 4px; line-height: 1.5; }
+
+@media (max-width: 800px) {
+  body {
+    display: block;
+    min-width: 0;
+  }
+
+  #sidebar {
+    top: 0;
+    right: 0;
+    bottom: auto;
+    width: 100%;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .sb-logo {
+    grid-column: 1;
+    grid-row: 1;
+    padding: 10px 14px;
+    border-bottom: 0;
+  }
+
+  .sb-logo .sub,
+  .sb-user-info {
+    display: none;
+  }
+
+  .sb-user {
+    grid-column: 2;
+    grid-row: 1;
+    gap: 8px;
+    padding: 8px 12px;
+    border-top: 0;
+  }
+
+  .logout-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  #sidebar nav {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px;
+    padding: 4px 8px 8px;
+  }
+
+  .nav-btn {
+    min-width: 0;
+    min-height: 44px;
+    justify-content: center;
+    padding: 8px 4px;
+    border-left: 0;
+    border-top: 3px solid transparent;
+    font-size: 11px;
+    line-height: 1.2;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .nav-btn.active {
+    border-left-color: transparent;
+    border-top-color: var(--violet-500);
+  }
+
+  #main {
+    width: 100%;
+    margin-left: 0;
+    padding: 112px 20px 24px;
+    flex: 1 1 auto;
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .ugrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tbl-wrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 640px) {
+  #sidebar nav {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  #main {
+    padding: 164px 12px 20px;
+  }
+
+  .ph {
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .ph-title {
+    font-size: 20px;
+  }
+
+  .ph-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .stats {
+    gap: 10px;
+  }
+
+  .stat {
+    min-width: 0;
+    padding: 14px 12px;
+  }
+
+  .stat-lbl {
+    font-size: 11px;
+    line-height: 1.35;
+  }
+
+  .stat-val {
+    font-size: 24px;
+  }
+
+  .card-hd {
+    padding: 14px 16px;
+  }
+
+  .li {
+    gap: 12px;
+    padding: 12px 16px;
+  }
+
+  .li-t,
+  .uemail {
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .uemail {
+    max-width: none;
+  }
+
+  table {
+    min-width: 620px;
+  }
+
+  #page-emprestimos table {
+    min-width: 760px;
+  }
+
+  .ftabs {
+    width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ftab {
+    flex: 0 0 auto;
+  }
+
+  .ugrid,
+  .cgrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ucard,
+  .ccard {
+    min-width: 0;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .usr-dialog {
+    width: calc(100% - 24px);
+    max-height: calc(100vh - 24px);
+    padding: 18px;
+  }
+
+  .usr-dialog-actions {
+    flex-wrap: wrap;
+  }
+
+  .usr-dialog-actions > button {
+    flex: 1 1 120px;
+  }
+
+  .empty td {
+    padding: 24px;
+  }
+}
+
+@media (min-width: 801px) and (max-width: 1099px) {
+  .stats,
+  .ugrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

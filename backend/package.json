@@ -2,10 +2,11 @@
   "name": "sceb-api",
   "version": "1.0.0",
   "private": true,
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "prisma generate && tsc -p tsconfig.json",
+    "postinstall": "prisma generate",
+    "typecheck": "tsc -p tsconfig.json",
     "start": "node dist/src/server.js",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",

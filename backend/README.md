@@ -1,6 +1,6 @@
 # SCEB API
 
-API REST em Node.js, Express, TypeScript e Prisma. O banco padrão é SQLite para desenvolvimento local; a configuração do Prisma pode ser adaptada para PostgreSQL em implantação.
+API REST em Node.js, Express, TypeScript e Prisma, servida junto ao frontend Vite pela Vercel. O banco persistente é PostgreSQL no Neon.
 
 ## Requisitos
 
@@ -9,22 +9,29 @@ API REST em Node.js, Express, TypeScript e Prisma. O banco padrão é SQLite par
 
 ## Configuração
 
-No PowerShell, dentro desta pasta:
+No PowerShell, a partir da raiz do repositório, vincule o projeto e baixe as variáveis do Neon:
 
 ```powershell
-Copy-Item .env.example .env
-npm install
+vercel link --yes --scope sceb --project sceb
+vercel env pull .env.local --yes
+pnpm install --frozen-lockfile
+npm --prefix backend ci
 ```
 
-Edite `.env` e defina uma senha de exatamente 8 caracteres para o administrador de demonstração e um `JWT_SECRET` aleatório com pelo menos 32 caracteres. Senhas de usuários também devem ter exatamente 8 caracteres. Depois inicialize o banco:
+O desenvolvimento usa as variáveis vinculadas ao projeto Vercel e o banco Neon:
 
 ```powershell
-npm run db:migrate -- --name init
-npm run db:seed
-npm run dev
+vercel dev
 ```
 
-A API estará em `http://localhost:3000/api`; o Swagger UI fica em `/api/docs` e o health check em `/api/health`.
+Para aplicar migrações ou criar o administrador de demonstração, execute os comandos da raiz com o ambiente Vercel:
+
+```powershell
+vercel env run -- npm --prefix backend run db:deploy
+vercel env run -- npm --prefix backend run db:seed
+```
+
+A API local estará em `http://localhost:3000/api`; o Swagger UI fica em `/api/docs` e o health check em `/api/health`.
 
 ## Acesso por perfil
 
