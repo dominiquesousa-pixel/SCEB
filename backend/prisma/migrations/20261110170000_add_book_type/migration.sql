@@ -1,0 +1,3 @@
+CREATE TYPE "BookType" AS ENUM ('MANUAL_PROFESSOR', 'LIVRO_ALUNO');
+
+ALTER TABLE "Book" ADD COLUMN "bookType" "BookType";

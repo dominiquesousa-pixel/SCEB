@@ -20,6 +20,11 @@ enum LoanStatus {
   RETURNED
 }
 
+enum BookType {
+  MANUAL_PROFESSOR
+  LIVRO_ALUNO
+}
+
 model User {
   id           String   @id @default(cuid())
   name         String
@@ -46,6 +51,7 @@ model Book {
   isbn            String   @unique
   publisher       String?
   publicationYear Int?
+  bookType        BookType?
   copies          Int
   availableCopies Int
   categoryId      String

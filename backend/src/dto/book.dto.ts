@@ -5,6 +5,7 @@ export const createBookDto = z.object({
   isbn: z.string().trim().min(10).max(17),
   publisher: z.string().trim().max(120).optional(),
   publicationYear: z.number().int().min(1).max(9999).optional(),
+  bookType: z.enum(['MANUAL_PROFESSOR', 'LIVRO_ALUNO']).nullable().optional(),
   copies: z.number().int().positive(),
   categoryId: z.string().min(1),
 });
@@ -15,6 +16,7 @@ export const updateBookDto = z
     isbn: z.string().trim().min(10).max(17).optional(),
     publisher: z.string().trim().max(120).nullable().optional(),
     publicationYear: z.number().int().min(1).max(9999).nullable().optional(),
+    bookType: z.enum(['MANUAL_PROFESSOR', 'LIVRO_ALUNO']).nullable().optional(),
     copies: z.number().int().positive().optional(),
     categoryId: z.string().min(1).optional(),
   })

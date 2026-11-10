@@ -31,6 +31,9 @@ function mapBook(book) {
     isbn: book.isbn,
     editora: book.publisher || '',
     ano: book.publicationYear || '',
+    tipoLivro: book.bookType === 'MANUAL_PROFESSOR'
+      ? 'Manual do professor'
+      : book.bookType === 'LIVRO_ALUNO' ? 'Livro do aluno' : '',
     cat: book.category.name,
     categoryId: book.category.id,
     total: book.copies,
@@ -102,7 +105,8 @@ function filtrarLivros(query = '') {
   return livros.filter(book =>
     book.titulo.toLowerCase().includes(normalizedQuery) ||
     book.isbn.toLowerCase().includes(normalizedQuery) ||
-    book.cat.toLowerCase().includes(normalizedQuery)
+    book.cat.toLowerCase().includes(normalizedQuery) ||
+    book.tipoLivro.toLowerCase().includes(normalizedQuery)
   );
 }
 
@@ -158,10 +162,11 @@ function obterDadosRelatorio(section) {
       subtitle: query.trim() ? `Busca: ${query.trim()}` : undefined,
       sections: [{
         title: 'Livros',
-        head: ['Título', 'Categoria', 'ISBN', 'Editora', 'Ano', 'Exemplares', 'Disponíveis'],
+        head: ['Título', 'Categoria', 'Classificação', 'ISBN', 'Editora', 'Ano', 'Exemplares', 'Disponíveis'],
         body: filtrarLivros(query).map(book => [
           book.titulo,
           book.cat,
+          book.tipoLivro || '—',
           book.isbn,
           book.editora || '—',
           book.ano ? String(book.ano) : '—',
@@ -523,13 +528,14 @@ function renderLivros(q) {
         return `<tr>
           <td><p class="td-t">${escapeHtml(l.titulo)}</p><p class="td-s">${l.ano}</p></td>
           <td class="td-m">${escapeHtml(l.cat)}</td>
+          <td class="td-m">${escapeHtml(l.tipoLivro || '—')}</td>
           <td class="td-mo">${escapeHtml(l.isbn)}</td>
           <td class="td-m">${escapeHtml(l.editora)}</td>
           <td style="text-align:center">${dispBadge}</td>
           ${isAdministrator ? `<td>${renderAdminActions('book', l.id, l.titulo)}</td>` : ''}
         </tr>`;
       }).join('')
-    : `<tr class="empty"><td colspan="${isAdministrator ? 6 : 5}">Nenhum livro encontrado</td></tr>`;
+    : `<tr class="empty"><td colspan="${isAdministrator ? 7 : 6}">Nenhum livro encontrado</td></tr>`;
 
   document.querySelectorAll('[data-book-edit]').forEach(button => {
     button.addEventListener('click', () => abrirEdicaoLivro(button.dataset.bookEdit));
@@ -819,6 +825,7 @@ function renderCategorias() {
 const bookDialog = document.getElementById('book-dialog');
 const bookForm = document.getElementById('book-form');
 const bookCategory = document.getElementById('book-category');
+const bookType = document.getElementById('book-type');
 const bookIsbn = document.getElementById('book-isbn');
 const bookTitle = document.getElementById('book-title');
 const bookPublisher = document.getElementById('book-publisher');
@@ -851,6 +858,9 @@ function configurarDialogoLivro(book = null) {
   if (book) {
     bookTitle.value = book.titulo;
     bookCategory.value = book.categoryId;
+    bookType.value = book.tipoLivro === 'Manual do professor'
+      ? 'MANUAL_PROFESSOR'
+      : book.tipoLivro === 'Livro do aluno' ? 'LIVRO_ALUNO' : '';
     bookIsbn.value = book.isbn;
     bookPublisher.value = book.editora;
     bookYear.value = book.ano;
@@ -903,6 +913,7 @@ bookForm.addEventListener('submit', async event => {
     isbn,
     publisher: bookPublisher.value.trim() || null,
     publicationYear: bookYear.value ? Number(bookYear.value) : null,
+    bookType: bookType.value || null,
     copies: Number(bookCopies.value),
   };
   const isEditing = Boolean(editingBookId);

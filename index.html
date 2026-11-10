@@ -169,6 +169,7 @@
               <tr>
                 <th>Título</th>
                 <th>Categoria</th>
+                <th>Tipo de livro</th>
                 <th>ISBN</th>
                 <th>Editora</th>
                 <th style="text-align:center">Disponível</th>
@@ -319,6 +320,14 @@
           <label class="usr-field">
             Categoria
             <select id="book-category" required></select>
+          </label>
+          <label class="usr-field">
+            Classificação
+            <select id="book-type">
+              <option value="">Não informado (opcional)</option>
+              <option value="MANUAL_PROFESSOR">Manual do professor</option>
+              <option value="LIVRO_ALUNO">Livro do aluno</option>
+            </select>
           </label>
           <label class="usr-field">
             ISBN

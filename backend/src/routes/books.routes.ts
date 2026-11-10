@@ -13,6 +13,7 @@ const bookView = {
   isbn: true,
   publisher: true,
   publicationYear: true,
+  bookType: true,
   copies: true,
   availableCopies: true,
   category: { select: { id: true, name: true } },
@@ -51,6 +52,7 @@ booksRouter.post('/', ...libraryStaff, validateBody(createBookDto), async (reque
     isbn: string;
     publisher?: string;
     publicationYear?: number;
+    bookType?: 'MANUAL_PROFESSOR' | 'LIVRO_ALUNO' | null;
     copies: number;
     categoryId: string;
   };
@@ -67,6 +69,7 @@ booksRouter.patch('/:id', authenticate, authorizeRoles('ADMINISTRADOR'), validat
     isbn?: string;
     publisher?: string | null;
     publicationYear?: number | null;
+    bookType?: 'MANUAL_PROFESSOR' | 'LIVRO_ALUNO' | null;
     copies?: number;
     categoryId?: string;
   };
