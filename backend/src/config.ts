@@ -9,5 +9,5 @@ if (!jwtSecret || jwtSecret.length < 32) {
 export const config = {
   port: Number(process.env.PORT ?? 3000),
   jwtSecret,
-  corsOrigin: process.env.CORS_ORIGIN ?? 'http://localhost:8443',
+  corsOrigin: process.env.CORS_ORIGIN ?? process.env.RENDER_EXTERNAL_URL ?? 'http://localhost:8443',
 };

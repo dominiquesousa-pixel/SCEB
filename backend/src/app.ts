@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import { resolve } from 'node:path';
 import swaggerUi from 'swagger-ui-express';
 import { config } from './config.js';
 import { prisma } from './lib/prisma.js';
@@ -34,6 +35,19 @@ app.use('/api/categories', categoriesRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/loans', loansRouter);
 app.use('/api/dashboard', authenticate, dashboardRouter);
+
+const frontendDirectory = resolve(process.cwd(), '../dist');
+app.use(express.static(frontendDirectory));
+app.use((request, response, next) => {
+  if (request.method !== 'GET' || request.path === '/api' || request.path.startsWith('/api/')) {
+    next();
+    return;
+  }
+
+  response.sendFile(resolve(frontendDirectory, 'index.html'), (error) => {
+    if (error) next(error);
+  });
+});
 
 app.use((_request, response) => response.status(404).json({ error: 'Rota não encontrada.' }));
 app.use(errorHandler);
