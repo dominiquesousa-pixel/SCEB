@@ -3,7 +3,7 @@ services:
     name: sceb
     runtime: node
     plan: free
-    buildCommand: npm ci && npm --prefix backend ci && npm run build && npm --prefix backend run build
+    buildCommand: npm ci && npm --prefix backend ci && npm run build && npm --prefix backend run typecheck
     startCommand: npm --prefix backend run start:render
     healthCheckPath: /api/health
     envVars:
